@@ -119,6 +119,7 @@ def upgradeable?(name)
 end
 
 def install(name)
+  Chef::Log.info "#{::File.join(node['chocolatey']['bin_path'],"chocolatey.bat")} install #{name} #{cmd_args}"
    converge_by("install package #{name}") do
      execute "install package #{name}" do
        command "#{::File.join(node['chocolatey']['bin_path'],"chocolatey.bat")} install #{name} #{cmd_args}"
