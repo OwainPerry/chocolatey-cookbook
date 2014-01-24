@@ -22,11 +22,22 @@ if node['platform_family'] != "windows"
   return "platform not supported"
 end
 
-include_recipe "powershell"
+isServer2012 = node['os_version'] == "6.3.9600" 
+chocolatey_file_path = ::File.exist?( ::File.join(node['chocolatey']['bin_path'], "chocolatey.bat") ) 
 
-powershell "install chocolatey" do
-  code "iex ((new-object net.webclient).DownloadString('#{node['chocolatey']['Uri']}'))"
-  not_if { ::File.exist?( ::File.join(node['chocolatey']['bin_path'], "chocolatey.bat") ) }
+if isServer2012
+	powershell_script "install chocolatey" do 
+	  code <<-EOH
+     	iex ((new-object net.webclient).DownloadString('#{node['chocolatey']['Uri']}'))
+  	  EOH
+	  not_if { chocolatey_file_path }	
+	end
+else
+	include_recipe "powershell"
+	powershell "install chocolatey" do
+	  code "iex ((new-object net.webclient).DownloadString('#{node['chocolatey']['Uri']}'))"
+	  not_if { chocolatey_file_path }
+	end
 end
 
 file "cygwin log" do
